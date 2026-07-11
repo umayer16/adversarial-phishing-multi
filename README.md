@@ -82,9 +82,9 @@ Fine-tuned `distilbert-base-uncased` checkpoints (one per dataset) are hosted on
 |---|---|
 | Enron Spam | [`[umayer16]/distilbert-phishing-enron-spam`](https://huggingface.co/umayer16/distilbert-phishing-enron-spam) |
 | Spam Detection | [`[umayer16]/distilbert-phishing-spam-detection`](https://huggingface.co/umayer16/distilbert-phishing-spam-detection) |
-| SMS Spam | [`[your-hf-username]/distilbert-phishing-sms-spam`](https://huggingface.co/[your-hf-username]/distilbert-phishing-sms-spam) |
-| Phishing Email Dataset | [`[your-hf-username]/distilbert-phishing-email-dataset`](https://huggingface.co/[your-hf-username]/distilbert-phishing-email-dataset) |
-| PhishingEmail Detection | [`[your-hf-username]/distilbert-phishing-detection-v2`](https://huggingface.co/[your-hf-username]/distilbert-phishing-detection-v2) |
+| SMS Spam | [`[umayer16]/distilbert-phishing-sms-spam`](https://huggingface.co/[umayer16]/distilbert-phishing-sms-spam) |
+| Phishing Email Dataset | [`[umayer16]/distilbert-phishing-email-dataset`](https://huggingface.co/[umayer16]/distilbert-phishing-email-dataset) |
+| PhishingEmail Detection | [`[umayer16]/distilbert-phishing-detection-v2`](https://huggingface.co/[umayer16]/distilbert-phishing-detection-v2) |
 
 Load any model directly with `transformers`:
 
