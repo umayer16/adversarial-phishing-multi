@@ -91,7 +91,7 @@ Load any model directly with `transformers`:
 ```python
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-model_name = "[your-hf-username]/distilbert-phishing-enron-spam"
+model_name = "umayer16/distilbert-phishing-enron-spam"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSequenceClassification.from_pretrained(model_name)
 ```
@@ -189,4 +189,3 @@ Thanks to Dr. Latif Siddiq for supervision and guidance throughout this project.
 
 ## License
 
-[Choose a license — e.g. MIT for code, and check individual dataset licenses on their respective Hugging Face pages before redistribution.]
