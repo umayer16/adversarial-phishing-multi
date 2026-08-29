@@ -511,14 +511,28 @@ plt.savefig(FIGURES_DIR / "fig1_baseline_summary.png", bbox_inches="tight")
 plt.show()
 print("✅ Figure 1 (baseline) saved.")
 
+# ══════════════════════════════════════════════════════════════════════════
+# REPLACEMENT BLOCK — delete everything from "def make_attack_metric_figure"
+# through the end of "# Figure 8" (i.e. lines defining make_attack_metric_figure,
+# the Figure 2/3/4/5 calls, the Figure 6 heatmap, and the Figure 7/8 FP bar
+# charts) and paste this in its place. Keep Figure 1 exactly as it is, and
+# keep everything from "FINAL SUMMARY" onward unchanged.
+#
+# This produces 3 figures (Fig 2, Fig 3, Fig 4) instead of the previous 7,
+# for a total of 4 figures in the paper (Fig 1 + these 3).
+# ══════════════════════════════════════════════════════════════════════════
 
-def make_attack_metric_figure(metric, ylabel, attack, fig_num, fig_title, filename):
-    fig, ax = plt.subplots(figsize=(9, 6.5))
+PERTURBATION_RATES_PCT = [int(r * 100) for r in PERTURBATION_RATES]
 
+
+# ─────────────────────────────────────────────────────────────────────────
+# FIGURE 2 — Accuracy vs. perturbation rate, two panels (Synonym | Homoglyph)
+# Replaces old Fig 2 + Fig 3.
+# ─────────────────────────────────────────────────────────────────────────
+def plot_metric_panel(ax, metric, attack):
     all_vals = []
     for ds in DATASETS:
         df_ds = df_all_results[df_all_results["dataset"] == ds]
-
         vals = []
         for rate in PERTURBATION_RATES:
             r = df_ds.loc[(df_ds["attack"] == attack) &
@@ -527,82 +541,133 @@ def make_attack_metric_figure(metric, ylabel, attack, fig_num, fig_title, filena
         all_vals.extend([v for v in vals if not np.isnan(v)])
 
         ax.plot(PERTURBATION_RATES_PCT, vals,
-                marker=MARKERS[attack], markersize=8,
+                marker=MARKERS[attack], markersize=7,
                 color=DS_COLORS[ds],
                 linestyle=DS_STYLES[ds]["linestyle"],
                 linewidth=DS_STYLES[ds]["linewidth"],
                 label=DISPLAY_NAMES[ds],
                 zorder=3)
 
-    lo = min(all_vals)
-    hi = max(all_vals)
+    lo, hi = min(all_vals), max(all_vals)
     padding = (hi - lo) * 0.15 if (hi - lo) > 1 else 0.5
     ax.set_ylim(max(0, lo - padding), min(105, hi + padding))
-
-    ax.set_xlabel("Perturbation Rate (%)", fontsize=11)
-    ax.set_ylabel(ylabel, fontsize=11)
+    ax.set_xlabel("Perturbation Rate (%)", fontsize=10)
     ax.set_xticks(PERTURBATION_RATES_PCT)
     ax.grid(True, alpha=0.3)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    ax.set_title(f"({'a' if attack == 'Synonym' else 'b'}) {attack}", fontsize=11)
 
-    # Legend centered below the plot, single horizontal row, no border —
-    # matches the reference layout
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15),
-              ncol=2, fontsize=9, frameon=False,
-              handlelength=2.5, columnspacing=1.5)
+
+def make_combined_metric_figure(metric, ylabel, fig_num, fig_title, filename):
+    fig, axes = plt.subplots(1, 2, figsize=(13, 6), sharey=False)
+    plot_metric_panel(axes[0], metric, "Synonym")
+    plot_metric_panel(axes[1], metric, "Homoglyph")
+    axes[0].set_ylabel(ylabel, fontsize=11)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, -0.08),
+               ncol=3, fontsize=9, frameon=False,
+               handlelength=2.5, columnspacing=1.5)
 
     fig.suptitle(f"Figure {fig_num}. {fig_title}",
-                 fontsize=13, fontweight="bold", y=1.02)
+                 fontsize=13, fontweight="bold", y=1.03)
     plt.tight_layout()
     plt.savefig(FIGURES_DIR / filename, bbox_inches="tight")
     plt.show()
     print(f"✅ Figure {fig_num} saved.")
 
 
-PERTURBATION_RATES_PCT = [int(r * 100) for r in PERTURBATION_RATES]
-
-# ── Figure 2: Accuracy — Synonym Attack ────────────────────────────────────
-make_attack_metric_figure(
-    metric    = "accuracy",
-    ylabel    = "Accuracy (%)",
-    attack    = "Synonym",
-    fig_num   = 2,
-    fig_title = "Classifier Accuracy After Synonym Substitution Attack",
-    filename  = "fig2_accuracy_synonym.png",
+make_combined_metric_figure(
+    metric="accuracy", ylabel="Accuracy (%)", fig_num=2,
+    fig_title="Classifier Accuracy vs. Perturbation Rate, All Five Datasets",
+    filename="fig2_accuracy_combined.png",
 )
 
-# ── Figure 3: Accuracy — Homoglyph Attack ──────────────────────────────────
-make_attack_metric_figure(
-    metric    = "accuracy",
-    ylabel    = "Accuracy (%)",
-    attack    = "Homoglyph",
-    fig_num   = 3,
-    fig_title = "Classifier Accuracy After Homoglyph Substitution Attack",
-    filename  = "fig3_accuracy_homoglyph.png",
+# ─────────────────────────────────────────────────────────────────────────
+# FIGURE 3 — Precision vs. perturbation rate, two panels (Synonym | Homoglyph)
+# Replaces old Fig 4 + Fig 5.
+# ─────────────────────────────────────────────────────────────────────────
+make_combined_metric_figure(
+    metric="precision", ylabel="Precision (%)", fig_num=3,
+    fig_title="Classifier Precision vs. Perturbation Rate, All Five Datasets",
+    filename="fig3_precision_combined.png",
 )
 
-# ── Figure 4: Precision — Synonym Attack ───────────────────────────────────
-make_attack_metric_figure(
-    metric    = "precision",
-    ylabel    = "Precision (%)",
-    attack    = "Synonym",
-    fig_num   = 4,
-    fig_title = "Classifier Precision After Synonym Substitution Attack",
-    filename  = "fig4_precision_synonym.png",
+# ─────────────────────────────────────────────────────────────────────────
+# FIGURE 4 — Confusion matrices, 2 representative datasets × 3 conditions
+# Replaces old Fig 6 (heatmap) + Fig 7 (homoglyph FPs) + Fig 8 (synonym FPs).
+#
+# Rows: Enron Spam (precision-collapse case) and SMS Spam (recall-collapse
+# case). Columns: Baseline, Homoglyph 30%, Synonym 30%. Change
+# CM_DATASETS below if you'd rather feature a different email dataset
+# (e.g. "PhishingEmailDetection" also shows a strong precision collapse).
+# ─────────────────────────────────────────────────────────────────────────
+# Chosen as the two most-impacted datasets by accuracy drop under attack
+# (homoglyph 30%, the dominant attack): Enron Spam −30.2pp, PhishingEmailDetection
+# −24.4pp — both ahead of Phishing Email Dataset (−19.5pp), Spam Detection
+# (−2.2pp), and SMS Spam (−1.1pp).
+CM_DATASETS   = ["Enron Spam", "PhishingEmailDetection"]
+CM_CONDITIONS = [("Baseline", None, 0.0), ("Homoglyph 30%", "Homoglyph", 0.30),
+                  ("Synonym 30%", "Synonym", 0.30)]
+N_ROWS, N_COLS = len(CM_DATASETS), len(CM_CONDITIONS)
+
+fig, axes = plt.subplots(
+    N_ROWS, N_COLS, figsize=(4.6 * N_COLS, 4.6 * N_ROWS),
+    gridspec_kw={"hspace": 0.55, "wspace": 0.35},
 )
 
-# ── Figure 5: Precision — Homoglyph Attack ─────────────────────────────────
-make_attack_metric_figure(
-    metric    = "precision",
-    ylabel    = "Precision (%)",
-    attack    = "Homoglyph",
-    fig_num   = 5,
-    fig_title = "Classifier Precision After Homoglyph Substitution Attack",
-    filename  = "fig5_precision_homoglyph.png",
-)
+for i, ds in enumerate(CM_DATASETS):
+    df_ds = df_all_results[df_all_results["dataset"] == ds]
+    for j, (cond_label, attack, rate) in enumerate(CM_CONDITIONS):
+        if attack is None:
+            row = df_ds.loc[df_ds["attack"].isna()]
+        else:
+            row = df_ds.loc[(df_ds["attack"] == attack) & (df_ds["rate"] == rate)]
+        row = row.iloc[0]
 
-# ── Figure 6: Heatmap ─────────────────────────────────────────────────────────
+        cm = np.array([[row["cm_tn"], row["cm_fp"]],
+                        [row["cm_fn"], row["cm_tp"]]])
+        acc = row["accuracy"] * 100
+
+        ax = axes[i, j]
+        sns.heatmap(cm, annot=True, fmt=".0f", cmap="Blues", cbar=False,
+                    xticklabels=["Legit.", "Phish."],
+                    yticklabels=["Legit.", "Phish."],
+                    ax=ax, annot_kws={"size": 15, "weight": "bold"},
+                    linewidths=1.2, linecolor="white", square=True)
+        ax.tick_params(axis="both", labelsize=10, length=0)
+        ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+
+        # Only the bottom row gets an x-axis label, only the left column
+        # gets a y-axis label — avoids repeating the same text six times.
+        ax.set_xlabel("Predicted label" if i == N_ROWS - 1 else "", fontsize=10)
+        ax.set_ylabel("True label" if j == 0 else "", fontsize=10)
+
+        # Panel title is just the condition + accuracy — no dataset name,
+        # since the dataset is already labeled once per row (below).
+        ax.set_title(f"{cond_label}\nAcc: {acc:.2f}%", fontsize=11, fontweight="bold")
+
+# One dataset label per row, placed in the left margin instead of inside
+# every panel's title.
+for i, ds in enumerate(CM_DATASETS):
+    axes[i, 0].annotate(
+        ds, xy=(0, 0.5), xytext=(-axes[i, 0].yaxis.labelpad - 42, 0),
+        xycoords=axes[i, 0].yaxis.label, textcoords="offset points",
+        fontsize=13, fontweight="bold", ha="right", va="center", rotation=90,
+    )
+
+fig.suptitle("Figure 4. Confusion Matrices — Two Representative Datasets × Three Conditions",
+             fontsize=14, fontweight="bold", y=1.02)
+plt.savefig(FIGURES_DIR / "fig4_confusion_matrices.png", bbox_inches="tight")
+plt.show()
+print("✅ Figure 4 saved.")
+
+# ─────────────────────────────────────────────────────────────────────────
+# FIGURE 5 — Accuracy (%) and Δ vs. baseline at 30% perturbation, ALL FIVE
+# datasets. Restored from the original script's Figure 6 (unchanged logic,
+# renumbered) since it's the only figure that puts every dataset in one view.
+# ─────────────────────────────────────────────────────────────────────────
 datasets_list = list(DATASETS)
 heatmap_rows  = []
 for ds in datasets_list:
@@ -633,87 +698,16 @@ sns.heatmap(
     annot_kws={"size": 11, "weight": "bold"},
 )
 ax.set_title(
-    "Figure 6. Accuracy (%) and Δ vs. Baseline at 30% Perturbation Across All Datasets",
+    "Figure 5. Accuracy (%) and Δ vs. Baseline at 30% Perturbation Across All Datasets",
     fontsize=12, fontweight="bold", pad=16)
 ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=8.5)
 ax.set_xticklabels(ax.get_xticklabels(), rotation=0, fontsize=10)
 plt.tight_layout()
-plt.savefig(FIGURES_DIR / "fig6_heatmap_summary.png", bbox_inches="tight")
+plt.savefig(FIGURES_DIR / "fig5_heatmap_summary.png", bbox_inches="tight")
 plt.show()
-print("✅ Figure 6 saved.")
+print("✅ Figure 5 saved.")
 
-
-# ── Figure 7: False positives ─────────────────────────────────────────────────
-fp_baseline, fp_homo30, ds_labels = [], [], []
-for ds in datasets_list:
-    df_ds = df_all_results[df_all_results["dataset"] == ds]
-    b = df_ds[df_ds["attack"].isna()]
-    h = df_ds[(df_ds["attack"] == "Homoglyph") & (df_ds["rate"] == 0.30)]
-    if b.empty or h.empty:
-        continue
-    fp_baseline.append(int(b["cm_fp"].values[0]))
-    fp_homo30.append(int(h["cm_fp"].values[0]))
-    ds_labels.append(DISPLAY_NAMES[ds])
-
-x = np.arange(len(ds_labels)); width = 0.35
-fig, ax = plt.subplots(figsize=(13, 5.5))
-bars1 = ax.bar(x - width/2, fp_baseline, width,
-               label="Baseline (0%)", color="#2CA02C", alpha=0.85)
-bars2 = ax.bar(x + width/2, fp_homo30,   width,
-               label="Homoglyph 30%", color="#D62728", alpha=0.85)
-ax.bar_label(bars1, padding=4, fontsize=9, fontweight="bold")
-ax.bar_label(bars2, padding=4, fontsize=9, fontweight="bold")
-ax.set_xlabel("Dataset", fontsize=11)
-ax.set_ylabel("False Positives (Legitimate → Phishing)", fontsize=10)
-ax.set_title(
-    "Figure 7. False Positive Count: Baseline vs. Homoglyph 30% Attack Across Datasets",
-    fontsize=12, fontweight="bold")
-ax.set_xticks(x)
-ax.set_xticklabels(ds_labels, rotation=12, ha="right", fontsize=8.5)
-ax.legend(fontsize=10)
-ax.grid(True, alpha=0.3, axis="y")
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-plt.tight_layout()
-plt.savefig(FIGURES_DIR / "fig7_false_positives.png", bbox_inches="tight")
-plt.show()
-print("✅ Figure 7 saved.")
-
-# ── Figure 8: False positives — Synonym 30% ────────────────────────────────────
-fp_baseline, fp_syn30, ds_labels = [], [], []
-for ds in datasets_list:
-    df_ds = df_all_results[df_all_results["dataset"] == ds]
-    b = df_ds[df_ds["attack"].isna()]
-    s = df_ds[(df_ds["attack"] == "Synonym") & (df_ds["rate"] == 0.30)]
-    if b.empty or s.empty:
-        continue
-    fp_baseline.append(int(b["cm_fp"].values[0]))
-    fp_syn30.append(int(s["cm_fp"].values[0]))
-    ds_labels.append(DISPLAY_NAMES[ds])
-
-x = np.arange(len(ds_labels)); width = 0.35
-fig, ax = plt.subplots(figsize=(13, 5.5))
-bars1 = ax.bar(x - width/2, fp_baseline, width,
-               label="Baseline (0%)", color="#2CA02C", alpha=0.85)
-bars2 = ax.bar(x + width/2, fp_syn30,   width,
-               label="Synonym 30%", color="#1F77B4", alpha=0.85)
-ax.bar_label(bars1, padding=4, fontsize=9, fontweight="bold")
-ax.bar_label(bars2, padding=4, fontsize=9, fontweight="bold")
-ax.set_xlabel("Dataset", fontsize=11)
-ax.set_ylabel("False Positives (Legitimate → Phishing)", fontsize=10)
-ax.set_title(
-    "Figure 8. False Positive Count: Baseline vs. Synonym 30% Attack Across Datasets",
-    fontsize=12, fontweight="bold")
-ax.set_xticks(x)
-ax.set_xticklabels(ds_labels, rotation=12, ha="right", fontsize=8.5)
-ax.legend(fontsize=10)
-ax.grid(True, alpha=0.3, axis="y")
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-plt.tight_layout()
-plt.savefig(FIGURES_DIR / "fig8_false_positives_synonym.png", bbox_inches="tight")
-plt.show()
-print("✅ Figure 8 saved.")
+print(f"\n✅ 5 figures total saved to {FIGURES_DIR}")
 
 print("\n" + "="*70)
 print("FINAL SUMMARY — ALL DATASETS × ALL CONDITIONS")
