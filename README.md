@@ -169,7 +169,7 @@ If you use this code, data splits, or trained models, please cite:
 @article{arif2026adversarial,
   title   = {Adversarial Robustness of NLP-Based Phishing Email Classifiers: A Multi-Dataset Empirical Study},
   author  = {Arif, Muktadir},
-  journal = {Columbia Junior Science Journal},
+  journal = {XXXXXXXXX},
   year    = {2026}
 }
 ```
