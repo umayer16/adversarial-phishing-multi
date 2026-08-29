@@ -144,8 +144,6 @@ python Code/multi_dataset_experiment.py
 
 This script was developed and run on Google Colab (T4 GPU) with Google Drive as persistent storage; the Drive-mounting (`google.colab.drive`) and Hugging Face Hub upload logic near the top of the file are Colab-specific and will need to be adapted (or removed) for a local or other cloud environment. `SKIP_COMPLETED = True` lets the script resume cleanly after an interruption by checking for existing per-dataset result CSVs and model checkpoints before re-running them.
 
-> **Note:** the figure-generation cells in this script currently produce an earlier 8-figure layout (separate synonym/homoglyph panels, separate false-positive bar charts) rather than the 5 consolidated figures shown in `Figures/` and used in the paper. The figure-generation code has not yet been updated to match; running the script end-to-end will not currently reproduce `Figures/` exactly.
-
 ---
 
 ## Figures
